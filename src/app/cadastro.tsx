@@ -196,16 +196,30 @@ export default function CadastroScreen() {
     ).start();
   }, [fade, slide, float]);
 
+  function validar() {
+    if (!nomeValido) return 'Digite seu nome completo (mínimo 3 letras).';
+    if (!emailValido) return 'Digite um e-mail válido.';
+    if (!senhaValida) return 'A senha precisa ter pelo menos 6 caracteres.';
+    if (!confirmacaoPreenchida) return 'Confirme sua senha.';
+    if (!senhasIguais) return 'As senhas não coincidem.';
+    return null;
+  }
+
   async function handleCadastro() {
-    if (!podeCadastrar) return;
+    if (carregando) return;
+
+    const erro = validar();
+    if (erro) {
+      Alert.alert('Confira os dados', erro);
+      return;
+    }
+
     Keyboard.dismiss();
     setCarregando(true);
     try {
       // TODO: trocar pela chamada real à sua API
       await new Promise((r) => setTimeout(r, 1000));
-      Alert.alert('Conta criada!', `Bem-vindo, ${nome.trim().split(' ')[0]}!`, [
-        { text: 'OK', onPress: () => router.back() },
-      ]);
+      router.replace('/home');
     } catch {
       Alert.alert('Erro', 'Não foi possível criar a conta. Tente novamente.');
     } finally {
@@ -264,7 +278,10 @@ export default function CadastroScreen() {
                     </LinearGradient>
                   </Animated.View>
                 )}
-                <AppText style={styles.title}>Crie sua conta</AppText>
+                <AppText style={styles.brand}>
+                  Relax<AppText style={styles.brandDot}>.</AppText>
+                </AppText>
+                <AppText style={styles.tagline}>Crie sua conta</AppText>
                 {!compact && (
                   <AppText style={styles.subtitle}>
                     Leva menos de um minuto para começar a agendar
@@ -354,11 +371,10 @@ export default function CadastroScreen() {
 
                 <Pressable
                   onPress={handleCadastro}
-                  disabled={!podeCadastrar}
                   android_ripple={{ color: 'rgba(0,0,0,0.15)', borderless: false }}
                   style={({ pressed }) => [
                     styles.buttonWrapper,
-                    !podeCadastrar && { opacity: 0.45 },
+                    !podeCadastrar && { opacity: 0.65 },
                     pressed && Platform.OS === 'ios' && { transform: [{ scale: 0.98 }] },
                   ]}>
                   <LinearGradient
@@ -470,6 +486,26 @@ function makeStyles(s: (n: number) => number, compact: boolean) {
       marginTop: s(8),
       lineHeight: s(21),
       paddingHorizontal: s(12),
+    },
+
+    brand: {
+      color: COLORS.text,
+      fontSize: s(compact ? 34 : 40),
+      lineHeight: s(compact ? 40 : 46),
+      fontWeight: '800',
+      letterSpacing: -1,
+      textAlign: 'center',
+    },
+    brandDot: {
+      color: COLORS.gold,
+    },
+    tagline: {
+      color: COLORS.accent,
+      fontSize: s(15),
+      fontWeight: '600',
+      letterSpacing: 1,
+      textAlign: 'center',
+      marginTop: s(2),
     },
 
     card: {

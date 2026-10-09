@@ -169,7 +169,7 @@ export default function LoginScreen() {
     try {
       // TODO: trocar pela chamada real à sua API
       await new Promise((r) => setTimeout(r, 1000));
-      Alert.alert('Login', `Bem-vindo, ${email}!`);
+    router.replace('/home');
       // router.replace('/home');
     } catch {
       Alert.alert('Erro', 'Não foi possível entrar. Tente novamente.');
@@ -219,12 +219,15 @@ export default function LoginScreen() {
                     <Ionicons name="leaf" size={s(compact ? 30 : 38)} color="#06312C" />
                   </LinearGradient>
                 </Animated.View>
-                <AppText style={styles.title}>Relaxe. Agende.{'\n'}Renove-se.</AppText>
-                {!compact && (
-                  <AppText style={styles.subtitle}>
-                    Encontre os melhores profissionais de massagem perto de você
-                  </AppText>
-                )}
+               <AppText style={styles.brand}>
+  Relax<AppText style={styles.brandDot}>.</AppText>
+</AppText>
+<AppText style={styles.tagline}>Relaxe. Agende. Renove-se.</AppText>
+{!compact && (
+  <AppText style={styles.subtitle}>
+    Encontre os melhores profissionais de massagem perto de você
+  </AppText>
+)}
               </View>
 
               {/* Card glass */}
@@ -382,6 +385,26 @@ function makeStyles(s: (n: number) => number, compact: boolean) {
       paddingHorizontal: s(12),
     },
 
+        brand: {
+      color: COLORS.text,
+      fontSize: s(compact ? 38 : 48),
+      lineHeight: s(compact ? 44 : 56),
+      fontWeight: '800',
+      letterSpacing: -1,
+      textAlign: 'center',
+    },
+    brandDot: {
+      color: COLORS.gold,
+    },
+    tagline: {
+      color: COLORS.accent,
+      fontSize: s(14),
+      fontWeight: '600',
+      letterSpacing: 1.2,
+      textAlign: 'center',
+      marginTop: s(2),
+    },
+
     card: {
       backgroundColor: COLORS.glass,
       borderWidth: 1,
@@ -462,4 +485,6 @@ function makeStyles(s: (n: number) => number, compact: boolean) {
     footerText: { color: COLORS.muted, fontSize: s(14) },
     footerLink: { color: COLORS.accent, fontSize: s(14), fontWeight: '700' },
   });
+
+
 }
