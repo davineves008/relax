@@ -10,10 +10,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("7605dc14-61fa-47bb-89ac-2b4bc83a48e6")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("Relax.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+954fcc925aaaf88a9f5d30b50d9d7f68559a9b8f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f5e8bd0fff0bbef54ed3ffb6b9ccbab9bb7f885f")]
 [assembly: System.Reflection.AssemblyProductAttribute("Relax.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Relax.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

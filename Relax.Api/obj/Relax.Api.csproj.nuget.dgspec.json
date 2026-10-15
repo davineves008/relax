@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\55519\\Desktop\\assets\\style\\relax\\Relax.Api\\Relax.Api.csproj": {}
+    "C:\\Users\\55519\\Desktop\\assets\\style\\relax\\relax.api\\Relax.Api.csproj": {}
   },
   "projects": {
-    "C:\\Users\\55519\\Desktop\\assets\\style\\relax\\Relax.Api\\Relax.Api.csproj": {
+    "C:\\Users\\55519\\Desktop\\assets\\style\\relax\\relax.api\\Relax.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\55519\\Desktop\\assets\\style\\relax\\Relax.Api\\Relax.Api.csproj",
+        "projectUniqueName": "C:\\Users\\55519\\Desktop\\assets\\style\\relax\\relax.api\\Relax.Api.csproj",
         "projectName": "Relax.Api",
-        "projectPath": "C:\\Users\\55519\\Desktop\\assets\\style\\relax\\Relax.Api\\Relax.Api.csproj",
+        "projectPath": "C:\\Users\\55519\\Desktop\\assets\\style\\relax\\relax.api\\Relax.Api.csproj",
         "packagesPath": "C:\\Users\\55519\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\55519\\Desktop\\assets\\style\\relax\\Relax.Api\\obj\\",
+        "outputPath": "C:\\Users\\55519\\Desktop\\assets\\style\\relax\\relax.api\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -58,6 +58,8 @@
               "version": "[10.0.10, )"
             },
             "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
               "target": "Package",
               "version": "[10.0.0, )"
             },

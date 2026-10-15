@@ -1,4 +1,18 @@
+using Microsoft.EntityFrameworkCore;
+using Relax.Api.Data;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Obtém a string de conexão do User Secrets
+var connectionString = builder.Configuration
+    .GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException(
+        "A string de conexão DefaultConnection não foi encontrada."
+    );
+
+// Configura o SQL Server
+builder.Services.AddDbContext<RelaxDbContext>(options =>
+    options.UseSqlServer(connectionString));
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -32,6 +46,33 @@ app.MapGet("/weatherforecast", () =>
     return forecast;
 })
 .WithName("GetWeatherForecast");
+app.MapGet("/api/teste-banco", async (RelaxDbContext db) =>
+{
+    try
+    {
+        bool conectado = await db.Database.CanConnectAsync();
+
+        if (conectado)
+        {
+            return Results.Ok(new
+            {
+                mensagem = "Conexão com SQL Server realizada com sucesso!"
+            });
+        }
+
+        return Results.Problem(
+            "Não foi possível conectar ao banco de dados.",
+            statusCode: 503
+        );
+    }
+    catch
+    {
+        return Results.Problem(
+            "Erro ao conectar ao banco de dados.",
+            statusCode: 503
+        );
+    }
+});
 
 app.Run();
 

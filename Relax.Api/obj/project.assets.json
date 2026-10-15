@@ -41,7 +41,7 @@
       "Humanizer.Core/2.14.1": {
         "type": "package",
         "compile": {
-          "lib/net6.0/Humanizer.dll": {
+          "lib/net6.0/_._": {
             "related": ".xml"
           }
         },
@@ -112,7 +112,7 @@
           "System.Security.Permissions": "7.0.0"
         },
         "compile": {
-          "ref/net7.0/Microsoft.Build.dll": {
+          "ref/net7.0/_._": {
             "related": ".xml"
           }
         },
@@ -125,7 +125,7 @@
       "Microsoft.Build.Framework/17.14.28": {
         "type": "package",
         "compile": {
-          "ref/net9.0/Microsoft.Build.Framework.dll": {
+          "ref/net9.0/_._": {
             "related": ".xml"
           }
         },
@@ -149,7 +149,7 @@
           "System.Security.Cryptography.ProtectedData": "9.0.0"
         },
         "compile": {
-          "ref/net9.0/Microsoft.Build.Tasks.Core.dll": {
+          "ref/net9.0/_._": {
             "related": ".xml"
           }
         },
@@ -168,7 +168,7 @@
           "System.Security.Cryptography.ProtectedData": "9.0.0"
         },
         "compile": {
-          "ref/net9.0/Microsoft.Build.Utilities.Core.dll": {
+          "ref/net9.0/_._": {
             "related": ".xml"
           }
         },
@@ -191,7 +191,7 @@
           "Microsoft.CodeAnalysis.Analyzers": "3.11.0"
         },
         "compile": {
-          "lib/net9.0/Microsoft.CodeAnalysis.dll": {
+          "lib/net9.0/_._": {
             "related": ".pdb;.xml"
           }
         },
@@ -249,7 +249,7 @@
           "Microsoft.CodeAnalysis.Common": "[4.14.0]"
         },
         "compile": {
-          "lib/net9.0/Microsoft.CodeAnalysis.CSharp.dll": {
+          "lib/net9.0/_._": {
             "related": ".pdb;.xml"
           }
         },
@@ -311,7 +311,7 @@
           "System.Composition": "9.0.0"
         },
         "compile": {
-          "lib/net9.0/Microsoft.CodeAnalysis.CSharp.Workspaces.dll": {
+          "lib/net9.0/_._": {
             "related": ".pdb;.xml"
           }
         },
@@ -371,7 +371,7 @@
           "System.Composition": "9.0.0"
         },
         "compile": {
-          "lib/net9.0/Microsoft.CodeAnalysis.Workspaces.dll": {
+          "lib/net9.0/_._": {
             "related": ".pdb;.xml"
           }
         },
@@ -443,10 +443,7 @@
           "System.Windows.Extensions": "9.0.0"
         },
         "compile": {
-          "lib/net9.0/Microsoft.CodeAnalysis.ExternalAccess.RazorCompiler.dll": {},
-          "lib/net9.0/Microsoft.CodeAnalysis.Workspaces.MSBuild.dll": {
-            "related": ".pdb;.xml"
-          }
+          "lib/net9.0/_._": {}
         },
         "runtime": {
           "lib/net9.0/Microsoft.CodeAnalysis.ExternalAccess.RazorCompiler.dll": {},
@@ -918,7 +915,7 @@
           "Newtonsoft.Json": "13.0.3"
         },
         "compile": {
-          "lib/net10.0/Microsoft.EntityFrameworkCore.Design.dll": {
+          "lib/net10.0/_._": {
             "related": ".xml"
           }
         },
@@ -967,7 +964,7 @@
       "Microsoft.Extensions.DependencyModel/10.0.0": {
         "type": "package",
         "compile": {
-          "lib/net10.0/Microsoft.Extensions.DependencyModel.dll": {
+          "lib/net10.0/_._": {
             "related": ".xml"
           }
         },
@@ -1110,7 +1107,7 @@
       "Microsoft.NET.StringTools/17.14.28": {
         "type": "package",
         "compile": {
-          "ref/net9.0/Microsoft.NET.StringTools.dll": {
+          "ref/net9.0/_._": {
             "related": ".xml"
           }
         },
@@ -1152,7 +1149,7 @@
           "System.CodeDom": "6.0.0"
         },
         "compile": {
-          "lib/net6.0/Mono.TextTemplating.dll": {}
+          "lib/net6.0/_._": {}
         },
         "runtime": {
           "lib/net6.0/Mono.TextTemplating.dll": {}
@@ -1164,7 +1161,7 @@
       "Newtonsoft.Json/13.0.3": {
         "type": "package",
         "compile": {
-          "lib/net6.0/Newtonsoft.Json.dll": {
+          "lib/net6.0/_._": {
             "related": ".xml"
           }
         },
@@ -1193,7 +1190,7 @@
       "System.CodeDom/9.0.0": {
         "type": "package",
         "compile": {
-          "lib/net9.0/System.CodeDom.dll": {
+          "lib/net9.0/_._": {
             "related": ".xml"
           }
         },
@@ -1228,7 +1225,7 @@
       "System.Composition.AttributedModel/9.0.0": {
         "type": "package",
         "compile": {
-          "lib/net9.0/System.Composition.AttributedModel.dll": {
+          "lib/net9.0/_._": {
             "related": ".xml"
           }
         },
@@ -1247,7 +1244,7 @@
           "System.Composition.AttributedModel": "9.0.0"
         },
         "compile": {
-          "lib/net9.0/System.Composition.Convention.dll": {
+          "lib/net9.0/_._": {
             "related": ".xml"
           }
         },
@@ -1266,7 +1263,7 @@
           "System.Composition.Runtime": "9.0.0"
         },
         "compile": {
-          "lib/net9.0/System.Composition.Hosting.dll": {
+          "lib/net9.0/_._": {
             "related": ".xml"
           }
         },
@@ -1282,7 +1279,7 @@
       "System.Composition.Runtime/9.0.0": {
         "type": "package",
         "compile": {
-          "lib/net9.0/System.Composition.Runtime.dll": {
+          "lib/net9.0/_._": {
             "related": ".xml"
           }
         },
@@ -1303,7 +1300,7 @@
           "System.Composition.Runtime": "9.0.0"
         },
         "compile": {
-          "lib/net9.0/System.Composition.TypedParts.dll": {
+          "lib/net9.0/_._": {
             "related": ".xml"
           }
         },
@@ -1322,7 +1319,7 @@
           "System.Security.Cryptography.ProtectedData": "9.0.4"
         },
         "compile": {
-          "lib/net9.0/System.Configuration.ConfigurationManager.dll": {
+          "lib/net9.0/_._": {
             "related": ".xml"
           }
         },
@@ -1338,7 +1335,7 @@
       "System.Formats.Nrbf/9.0.0": {
         "type": "package",
         "compile": {
-          "lib/net9.0/System.Formats.Nrbf.dll": {
+          "lib/net9.0/_._": {
             "related": ".xml"
           }
         },
@@ -1387,7 +1384,7 @@
       "System.Reflection.MetadataLoadContext/7.0.0": {
         "type": "package",
         "compile": {
-          "lib/net7.0/System.Reflection.MetadataLoadContext.dll": {
+          "lib/net7.0/_._": {
             "related": ".xml"
           }
         },
@@ -1406,7 +1403,7 @@
           "System.Formats.Nrbf": "9.0.0"
         },
         "compile": {
-          "lib/net9.0/System.Resources.Extensions.dll": {
+          "lib/net9.0/_._": {
             "related": ".xml"
           }
         },
@@ -1463,7 +1460,7 @@
           "System.Windows.Extensions": "9.0.0"
         },
         "compile": {
-          "lib/net9.0/System.Security.Permissions.dll": {
+          "lib/net9.0/_._": {
             "related": ".xml"
           }
         },
@@ -1479,7 +1476,7 @@
       "System.Windows.Extensions/9.0.0": {
         "type": "package",
         "compile": {
-          "lib/net9.0/System.Windows.Extensions.dll": {
+          "lib/net9.0/_._": {
             "related": ".xml"
           }
         },
@@ -3791,11 +3788,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\55519\\Desktop\\assets\\style\\relax\\Relax.Api\\Relax.Api.csproj",
+      "projectUniqueName": "C:\\Users\\55519\\Desktop\\assets\\style\\relax\\relax.api\\Relax.Api.csproj",
       "projectName": "Relax.Api",
-      "projectPath": "C:\\Users\\55519\\Desktop\\assets\\style\\relax\\Relax.Api\\Relax.Api.csproj",
+      "projectPath": "C:\\Users\\55519\\Desktop\\assets\\style\\relax\\relax.api\\Relax.Api.csproj",
       "packagesPath": "C:\\Users\\55519\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\55519\\Desktop\\assets\\style\\relax\\Relax.Api\\obj\\",
+      "outputPath": "C:\\Users\\55519\\Desktop\\assets\\style\\relax\\relax.api\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -4296,6 +4293,26 @@
       "warningLevel": 1,
       "message": "O pacote 'Microsoft.OpenApi' 2.0.0 tem uma alta vulnerabilidade de gravidade conhecida, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc",
       "libraryId": "Microsoft.OpenApi",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1902",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "O pacote 'System.Security.Cryptography.Pkcs' 9.0.4 tem uma moderado vulnerabilidade de gravidade conhecida, https://github.com/advisories/GHSA-2fmv-rv2c-59x7",
+      "libraryId": "System.Security.Cryptography.Pkcs",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "O pacote 'System.Security.Cryptography.Pkcs' 9.0.4 tem uma alta vulnerabilidade de gravidade conhecida, https://github.com/advisories/GHSA-846f-f764-76mx",
+      "libraryId": "System.Security.Cryptography.Pkcs",
       "targetGraphs": [
         "net10.0"
       ]
