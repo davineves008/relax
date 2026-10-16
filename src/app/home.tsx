@@ -12,21 +12,22 @@ type Acao = {
   titulo: string;
   descricao: string;
   icone: keyof typeof Ionicons.glyphMap;
-  rota?: '/agendamento' | '/usuarios' | '/feedback';
+  rota?: '/agendamento' | '/usuarios' | '/feedback'| '/reservas' | '/perfil';
 };
 
 const ACOES: Record<Perfil, Acao[]> = {
   cliente: [
     { titulo: 'Agendar massagem', descricao: 'Escolha dia e horário', icone: 'calendar-outline', rota: '/agendamento' },
-    { titulo: 'Minhas reservas', descricao: 'Acompanhe seus horários', icone: 'time-outline' },
+    { titulo: 'Minhas reservas', descricao: 'Acompanhe seus horários', icone: 'time-outline', rota: '/reservas' },
     { titulo: 'Avaliar atendimento', descricao: 'Compartilhe sua experiência', icone: 'star-outline', rota: '/feedback' },
-    { titulo: 'Meu perfil', descricao: 'Seus dados pessoais', icone: 'person-outline' },
+    { titulo: 'Meu perfil', descricao: 'Seus dados pessoais', icone: 'person-outline', rota: '/perfil' },
+    
   ],
   aluno: [
     { titulo: 'Minha disponibilidade', descricao: 'Cadastre dias e horários', icone: 'calendar-outline', rota: '/agendamento' },
-    { titulo: 'Meus atendimentos', descricao: 'Veja as práticas agendadas', icone: 'people-outline' },
+    { titulo: 'Meus atendimentos', descricao: 'Veja as práticas agendadas', icone: 'people-outline', rota: '/reservas' },
     { titulo: 'Minhas avaliações', descricao: 'Acompanhe seu progresso', icone: 'star-outline', rota: '/feedback' },
-    { titulo: 'Meu perfil', descricao: 'Seus dados pessoais', icone: 'person-outline' },
+    { titulo: 'Meu perfil', descricao: 'Seus dados pessoais', icone: 'person-outline', rota: '/perfil' },
   ],
   professor: [
     { titulo: 'Gerenciar agendas', descricao: 'Organize as práticas', icone: 'calendar-outline', rota: '/agendamento' },
@@ -69,7 +70,7 @@ export default function HomeScreen() {
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <View style={styles.header}>
             <View style={styles.headerText}>
-              <Text style={styles.brand}>MASSA<Text style={styles.brandAccent}>+</Text></Text>
+              <Text style={styles.brand}>Relax<Text style={styles.brandAccent}>+</Text></Text>
               <Text style={styles.greeting}>Olá, {primeiroNome}!</Text>
               <Text style={styles.subtitle}>{TITULOS[perfil]}</Text>
             </View>

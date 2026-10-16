@@ -1,4 +1,7 @@
 
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+
 import { useState } from 'react';
 import {
     Alert,
@@ -36,6 +39,14 @@ export default function AgendamentoScreen() {
   const [dia, setDia] = useState(8);
   const [horario, setHorario] = useState('');
 
+  function voltar() {
+  if (router.canGoBack()) {
+    router.back();
+  } else {
+    router.replace('/home');
+  }
+}
+
   function confirmar() {
     if (!horario) {
       if (Platform.OS === 'web') {
@@ -64,19 +75,29 @@ export default function AgendamentoScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.logo}>Relax</Text>
-            <Text style={styles.subtitulo}>
-              Práticas de Massoterapia
-            </Text>
-          </View>
+       <View style={styles.header}>
+  <View style={styles.headerEsquerda}>
+    <TouchableOpacity
+      style={styles.botaoVoltar}
+      onPress={voltar}
+      activeOpacity={0.7}
+      hitSlop={10}
+    >
+      <Ionicons name="chevron-back" size={22} color="#315747" />
+    </TouchableOpacity>
 
-          <View style={styles.avatar}>
-            <Text style={styles.avatarTexto}>R</Text>
-          </View>
-        </View>
+    <View>
+      <Text style={styles.logo}>Relax</Text>
+      <Text style={styles.subtitulo}>
+        Práticas de Massoterapia
+      </Text>
+    </View>
+  </View>
 
+  <View style={styles.avatar}>
+    <Text style={styles.avatarTexto}>R</Text>
+  </View>
+</View>
         <View style={styles.banner}>
           <Text style={styles.bannerTitulo}>
             Encontre seu horário
@@ -234,6 +255,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 25,
   },
+
+    headerEsquerda: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+
+  botaoVoltar: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E1E7E1',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  
   logo: {
     fontSize: 34,
     fontWeight: 'bold',
