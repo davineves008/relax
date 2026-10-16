@@ -4,7 +4,8 @@ namespace Relax.Api.Models
     {
         Cliente = 0,
         Aluno = 1,
-        Professor = 2
+        Professor = 2,
+        AdmMaster = 3
     }
 
     public class Usuario
