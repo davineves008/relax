@@ -11,6 +11,12 @@ using Relax.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// TESTE TEMPORÁRIO DO AMBIENTE DE HOSPEDAGEM
+if (builder.Configuration["RELAX_TESTE"] == "funcionando")
+{
+    Console.WriteLine("RELAX_TESTE disponível no servidor.");
+}
+
 // ======================================
 // 1. BANCO DE DADOS - SQL SERVER
 // ======================================
@@ -34,6 +40,18 @@ builder.Services.AddDbContext<RelaxDbContext>(options =>
 // Habilita controllers como AuthController
 // e UsuariosController.
 builder.Services.AddControllers();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("RelaxWeb", policy =>
+    {
+        policy.WithOrigins(
+                "http://localhost:8081"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 // Documentação OpenAPI.
 builder.Services.AddOpenApi();
@@ -223,12 +241,22 @@ app.UseHttpsRedirection();
 // ======================================
 // 10. MIDDLEWARES DE SEGURANÇA
 // ======================================
+app.UseCors("RelaxWeb");
 
 // Identifica o usuário pelo JWT.
 app.UseAuthentication();
 
 // Verifica as permissões do usuário.
 app.UseAuthorization();
+
+app.MapGet("/api/teste-ambiente", (IConfiguration config) =>
+{
+    return Results.Ok(new
+    {
+        ambienteConfigurado =
+            config["RELAX_TESTE"] == "funcionando"
+    });
+});
 
 // ======================================
 // 11. ROTAS DOS CONTROLLERS
