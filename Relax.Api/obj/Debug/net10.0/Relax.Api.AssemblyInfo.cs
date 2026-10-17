@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Relax.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+493b0b978b0a9e6de19afa4f652b48ed68a092f3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+788a6e783cc19f0a89b8fa8c5fbbc8abc1de944a")]
 [assembly: System.Reflection.AssemblyProductAttribute("Relax.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Relax.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
