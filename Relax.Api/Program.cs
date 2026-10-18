@@ -11,43 +11,85 @@ using Relax.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// TESTE TEMPORÁRIO DO AMBIENTE DE HOSPEDAGEM
-if (builder.Configuration["RELAX_TESTE"] == "funcionando")
+// ======================================
+// 1. CONFIGURAÇÕES DO AMBIENTE
+// ======================================
+
+// Prioriza as variáveis exclusivas do Relax.
+//
+// Em desenvolvimento, utiliza os
+// User Secrets como alternativa.
+//
+// Em produção, exige as variáveis RELAX_
+// para evitar conflitos com o SystemsI.
+
+string ObterConfiguracao(
+    string variavelRelax,
+    string configuracaoLocal)
 {
-    Console.WriteLine("RELAX_TESTE disponível no servidor.");
+    var valorRelax =
+        builder.Configuration[variavelRelax];
+
+    if (!string.IsNullOrWhiteSpace(valorRelax))
+    {
+        return valorRelax;
+    }
+
+    if (!builder.Environment.IsDevelopment())
+    {
+        throw new InvalidOperationException(
+            $"A variável {variavelRelax} não foi configurada."
+        );
+    }
+
+    var valorLocal =
+        builder.Configuration[configuracaoLocal];
+
+    if (string.IsNullOrWhiteSpace(valorLocal))
+    {
+        throw new InvalidOperationException(
+            $"A configuração {configuracaoLocal} não foi encontrada."
+        );
+    }
+
+    return valorLocal;
 }
 
 // ======================================
-// 1. BANCO DE DADOS - SQL SERVER
+// 2. BANCO DE DADOS - SQL SERVER
 // ======================================
 
-// Obtém a conexão dos User Secrets,
-// appsettings ou variáveis de ambiente.
-var connectionString = builder.Configuration
-    .GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException(
-        "A string de conexão DefaultConnection não foi encontrada."
-    );
+// Produção:
+// RELAX_ConnectionString
+//
+// Desenvolvimento:
+// ConnectionStrings:DefaultConnection
 
-// Registra o Entity Framework Core.
-builder.Services.AddDbContext<RelaxDbContext>(options =>
-    options.UseSqlServer(connectionString));
+var connectionString = ObterConfiguracao(
+    "RELAX_ConnectionString",
+    "ConnectionStrings:DefaultConnection"
+);
+
+builder.Services.AddDbContext<RelaxDbContext>(
+    options =>
+        options.UseSqlServer(connectionString)
+);
 
 // ======================================
-// 2. CONTROLLERS E OPENAPI
+// 3. CONTROLLERS E OPENAPI
 // ======================================
 
-// Habilita controllers como AuthController
-// e UsuariosController.
 builder.Services.AddControllers();
+
+// Permite requisições da aplicação
+// React Native Web em desenvolvimento.
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("RelaxWeb", policy =>
     {
-        policy.WithOrigins(
-                "http://localhost:8081"
-            )
+        policy
+            .WithOrigins("http://localhost:8081")
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -57,62 +99,74 @@ builder.Services.AddCors(options =>
 builder.Services.AddOpenApi();
 
 // ======================================
-// 3. SEGURANÇA DAS SENHAS
+// 4. SEGURANÇA DAS SENHAS
 // ======================================
 
-// Serviço responsável por criar e validar
-// hashes seguros das senhas dos usuários.
+// Responsável por gerar e validar
+// hashes seguros das senhas.
+
 builder.Services.AddScoped<
     IPasswordHasher<Usuario>,
     PasswordHasher<Usuario>
 >();
 
 // ======================================
-// 4. CONFIGURAÇÕES JWT
+// 5. CONFIGURAÇÕES JWT
 // ======================================
 
-// Chave secreta utilizada para assinar tokens.
-var jwtKey = builder.Configuration["Jwt:Key"]
-    ?? throw new InvalidOperationException(
-        "A chave Jwt:Key não foi configurada."
-    );
+// Variáveis cadastradas no SmarterASP.NET:
+//
+// RELAX_Jwt__Key
+// RELAX_Jwt__Issuer
+// RELAX_Jwt__Audience
+//
+// No desenvolvimento local, utiliza
+// Jwt:Key, Jwt:Issuer e Jwt:Audience.
 
-// Emissor do token.
-var jwtIssuer = builder.Configuration["Jwt:Issuer"]
-    ?? throw new InvalidOperationException(
-        "Jwt:Issuer não foi configurado."
-    );
+var jwtKey = ObterConfiguracao(
+    "RELAX_Jwt__Key",
+    "Jwt:Key"
+);
 
-// Público autorizado a utilizar o token.
-var jwtAudience = builder.Configuration["Jwt:Audience"]
-    ?? throw new InvalidOperationException(
-        "Jwt:Audience não foi configurado."
-    );
+var jwtIssuer = ObterConfiguracao(
+    "RELAX_Jwt__Issuer",
+    "Jwt:Issuer"
+);
 
-// Converte a chave Base64 para bytes.
+var jwtAudience = ObterConfiguracao(
+    "RELAX_Jwt__Audience",
+    "Jwt:Audience"
+);
+
+// Converte a chave JWT de Base64
+// para um conjunto de bytes.
+
 byte[] jwtKeyBytes;
 
 try
 {
-    jwtKeyBytes = Convert.FromBase64String(jwtKey);
+    jwtKeyBytes =
+        Convert.FromBase64String(jwtKey);
 }
 catch (FormatException)
 {
     throw new InvalidOperationException(
-        "Jwt:Key não está em um formato Base64 válido."
+        "A chave JWT não está em formato Base64 válido."
     );
 }
 
-// Valida o tamanho mínimo da chave.
+// Exige pelo menos 32 bytes
+// para a chave de assinatura.
+
 if (jwtKeyBytes.Length < 32)
 {
     throw new InvalidOperationException(
-        "Jwt:Key deve conter pelo menos 32 bytes."
+        "A chave JWT deve conter pelo menos 32 bytes."
     );
 }
 
 // ======================================
-// 5. AUTENTICAÇÃO JWT
+// 6. AUTENTICAÇÃO JWT
 // ======================================
 
 builder.Services
@@ -121,82 +175,99 @@ builder.Services
     )
     .AddJwtBearer(options =>
     {
-        // Configura a validação dos tokens.
         options.TokenValidationParameters =
             new TokenValidationParameters
             {
-                // Verifica o emissor.
+                // Validação do emissor.
                 ValidateIssuer = true,
                 ValidIssuer = jwtIssuer,
 
-                // Verifica o destinatário.
+                // Validação do destinatário.
                 ValidateAudience = true,
                 ValidAudience = jwtAudience,
 
-                // Verifica a assinatura.
+                // Validação da assinatura.
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey =
-                    new SymmetricSecurityKey(jwtKeyBytes),
 
-                // Verifica o prazo de validade.
+                IssuerSigningKey =
+                    new SymmetricSecurityKey(
+                        jwtKeyBytes
+                    ),
+
+                // Validação da expiração.
                 ValidateLifetime = true,
 
-                // Define os tipos de claims usados
-                // para identificar usuário e perfil.
+                // Identificação do usuário.
                 NameClaimType = ClaimTypes.Name,
+
+                // Identificação do perfil.
                 RoleClaimType = ClaimTypes.Role,
 
-                // Pequena tolerância de horário.
-                ClockSkew = TimeSpan.FromMinutes(1)
+                // Tolerância de horário.
+                ClockSkew =
+                    TimeSpan.FromMinutes(1)
             };
 
         // ======================================
-        // 6. VALIDAÇÃO DO USUÁRIO NO BANCO
+        // 7. VALIDAÇÃO DO USUÁRIO NO BANCO
         // ======================================
 
         options.Events = new JwtBearerEvents
         {
             OnTokenValidated = async context =>
             {
-                // Obtém o ID armazenado no JWT.
+                // Recupera o ID do usuário.
                 var idTexto = context.Principal?
-                    .FindFirst(ClaimTypes.NameIdentifier)?
+                    .FindFirst(
+                        ClaimTypes.NameIdentifier
+                    )?
                     .Value;
 
-                // Obtém o perfil armazenado no JWT.
+                // Recupera o perfil do JWT.
                 var perfilToken = context.Principal?
-                    .FindFirst(ClaimTypes.Role)?
+                    .FindFirst(
+                        ClaimTypes.Role
+                    )?
                     .Value;
 
-                // Verifica se o ID é válido.
+                // Valida o identificador.
                 if (!int.TryParse(
                     idTexto,
                     out var usuarioId))
                 {
-                    context.Fail("Usuário inválido.");
+                    context.Fail(
+                        "Usuário inválido."
+                    );
+
                     return;
                 }
 
-                // Obtém o DbContext da requisição.
+                // Obtém o banco de dados.
                 var db = context.HttpContext
                     .RequestServices
-                    .GetRequiredService<RelaxDbContext>();
+                    .GetRequiredService<
+                        RelaxDbContext
+                    >();
 
-                // Consulta o usuário no SQL Server.
+                // Consulta o usuário.
                 var usuario = await db.Usuarios
                     .AsNoTracking()
                     .FirstOrDefaultAsync(
                         u => u.Id == usuarioId,
-                        context.HttpContext.RequestAborted
+                        context.HttpContext
+                            .RequestAborted
                     );
 
-                // Rejeita o token se:
-                // - o usuário não existir;
-                // - estiver inativo;
-                // - seu perfil tiver sido alterado.
+                // Rejeita o token quando:
+                //
+                // - O usuário não existe;
+                // - Está inativo;
+                // - O perfil foi alterado.
+
                 if (usuario == null ||
                     !usuario.Ativo ||
-                    usuario.Perfil.ToString() != perfilToken)
+                    usuario.Perfil.ToString()
+                        != perfilToken)
                 {
                     context.Fail(
                         "Usuário inativo ou perfil alterado."
@@ -209,70 +280,60 @@ builder.Services
     });
 
 // ======================================
-// 7. AUTORIZAÇÃO
+// 8. AUTORIZAÇÃO
 // ======================================
 
-// Necessário para utilizar:
+// Permite utilizar:
+//
 // [Authorize]
+//
 // [Authorize(Roles = "AdmMaster")]
+//
 // [Authorize(Roles = "AdmMaster,Professor")]
+//
+// Os demais perfis continuam definidos
+// pelos atributos dos controllers.
 
 builder.Services.AddAuthorization();
 
 // ======================================
-// 8. CONSTRUIR A APLICAÇÃO
+// 9. CONSTRUIR A APLICAÇÃO
 // ======================================
 
 var app = builder.Build();
 
 // ======================================
-// 9. CONFIGURAÇÃO DO AMBIENTE
+// 10. CONFIGURAÇÃO DO AMBIENTE
 // ======================================
 
 if (app.Environment.IsDevelopment())
 {
-    // Disponibiliza a documentação OpenAPI.
+    // Disponibiliza a documentação
+    // OpenAPI apenas em desenvolvimento.
+
     app.MapOpenApi();
-}
 
-// Redirecionamento para HTTPS.
-app.UseHttpsRedirection();
+    // ==================================
+    // TESTE DO AMBIENTE
+    // ==================================
 
-// ======================================
-// 10. MIDDLEWARES DE SEGURANÇA
-// ======================================
-app.UseCors("RelaxWeb");
+    app.MapGet(
+        "/api/teste-ambiente",
+        (IConfiguration config) =>
+        {
+            return Results.Ok(new
+            {
+                ambienteConfigurado =
+                    config["RELAX_TESTE"]
+                        == "funcionando"
+            });
+        }
+    );
 
-// Identifica o usuário pelo JWT.
-app.UseAuthentication();
+    // ==================================
+    // TESTE DE CONEXÃO SQL SERVER
+    // ==================================
 
-// Verifica as permissões do usuário.
-app.UseAuthorization();
-
-app.MapGet("/api/teste-ambiente", (IConfiguration config) =>
-{
-    return Results.Ok(new
-    {
-        ambienteConfigurado =
-            config["RELAX_TESTE"] == "funcionando"
-    });
-});
-
-// ======================================
-// 11. ROTAS DOS CONTROLLERS
-// ======================================
-
-// Habilita as rotas definidas nos controllers.
-app.MapControllers();
-
-// ======================================
-// 12. TESTE DE CONEXÃO SQL SERVER
-// ======================================
-
-// Endpoint temporário para desenvolvimento.
-// Remover ou proteger antes da publicação.
-if (app.Environment.IsDevelopment())
-{
     app.MapGet(
         "/api/teste-banco",
         async (RelaxDbContext db) =>
@@ -280,7 +341,8 @@ if (app.Environment.IsDevelopment())
             try
             {
                 bool conectado =
-                    await db.Database.CanConnectAsync();
+                    await db.Database
+                        .CanConnectAsync();
 
                 if (conectado)
                 {
@@ -308,15 +370,40 @@ if (app.Environment.IsDevelopment())
 }
 
 // ======================================
+// 11. HTTPS E SEGURANÇA
+// ======================================
+
+// Redireciona HTTP para HTTPS.
+app.UseHttpsRedirection();
+
+// Aplica a política CORS.
+app.UseCors("RelaxWeb");
+
+// Identifica o usuário pelo JWT.
+app.UseAuthentication();
+
+// Verifica as permissões.
+app.UseAuthorization();
+
+// ======================================
+// 12. ROTAS DOS CONTROLLERS
+// ======================================
+
+// Habilita as rotas dos controllers,
+// incluindo autenticação e usuários.
+
+app.MapControllers();
+
+// ======================================
 // 13. INICIALIZAÇÃO DO ADM MASTER
 // ======================================
 
-// O inicializador só cria o primeiro Master
-// quando BootstrapAdmin:Enabled estiver ativo.
+// O inicializador só deve criar
+// o ADM Master quando a configuração
+// BootstrapAdmin:Enabled estiver ativa.
 //
-// Como já criamos o primeiro ADM Master e
-// removemos os secrets BootstrapAdmin,
-// nenhuma nova conta será criada.
+// Em produção, manter desabilitado
+// após a criação do primeiro administrador.
 
 await AdmMasterInitializer.CriarAsync(
     app.Services,
