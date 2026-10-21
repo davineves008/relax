@@ -168,3 +168,9 @@ C:\Users\55519\Desktop\assets\style\relax\Relax.Api\obj\Release\net10.0\refint\R
 C:\Users\55519\Desktop\assets\style\relax\Relax.Api\obj\Release\net10.0\Relax.Api.pdb
 C:\Users\55519\Desktop\assets\style\relax\Relax.Api\obj\Release\net10.0\Relax.Api.genruntimeconfig.cache
 C:\Users\55519\Desktop\assets\style\relax\Relax.Api\obj\Release\net10.0\ref\Relax.Api.dll
+C:\Users\55519\Desktop\assets\style\relax\Relax.Api\bin\Release\net10.0\publish\web.config
+C:\Users\55519\Desktop\assets\style\relax\Relax.Api\bin\Release\net10.0\publish\appsettings.Development.json
+C:\Users\55519\Desktop\assets\style\relax\Relax.Api\bin\Release\net10.0\publish\appsettings.json
+C:\Users\55519\Desktop\assets\style\relax\Relax.Api\bin\Release\net10.0\publish\Relax.Api.deps.json
+C:\Users\55519\Desktop\assets\style\relax\Relax.Api\bin\Release\net10.0\publish\Relax.Api.runtimeconfig.json
+C:\Users\55519\Desktop\assets\style\relax\Relax.Api\bin\Release\net10.0\publish\Relax.Api.staticwebassets.endpoints.json

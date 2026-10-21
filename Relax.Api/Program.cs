@@ -23,18 +23,21 @@ var builder = WebApplication.CreateBuilder(args);
 // Em produção, exige as variáveis RELAX_
 // para evitar conflitos com o SystemsI.
 
+
 string ObterConfiguracao(
     string variavelRelax,
     string configuracaoLocal)
 {
+    // Lê diretamente a variável de ambiente.
     var valorRelax =
-        builder.Configuration[variavelRelax];
+        Environment.GetEnvironmentVariable(variavelRelax);
 
     if (!string.IsNullOrWhiteSpace(valorRelax))
     {
         return valorRelax;
     }
 
+    // Em Production, exige a variável RELAX_.
     if (!builder.Environment.IsDevelopment())
     {
         throw new InvalidOperationException(
@@ -42,6 +45,7 @@ string ObterConfiguracao(
         );
     }
 
+    // Em Development, utiliza os User Secrets.
     var valorLocal =
         builder.Configuration[configuracaoLocal];
 
@@ -54,6 +58,7 @@ string ObterConfiguracao(
 
     return valorLocal;
 }
+
 
 // ======================================
 // 2. BANCO DE DADOS - SQL SERVER
