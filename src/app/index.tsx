@@ -1,6 +1,6 @@
-import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -20,6 +20,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { fazerLogin } from '../services/api';
 
 const COLORS = {
   bgTop: '#0B1F1C',
@@ -162,21 +163,46 @@ export default function LoginScreen() {
     ).start();
   }, [fade, slide, float]);
 
-  async function handleLogin() {
-    if (!podeEntrar) return;
-    Keyboard.dismiss();
-    setCarregando(true);
-    try {
-      // TODO: trocar pela chamada real à sua API
-      await new Promise((r) => setTimeout(r, 1000));
+  
+async function handleLogin() {
+  if (!podeEntrar) return;
+
+  Keyboard.dismiss();
+  setCarregando(true);
+
+  try {
+    // Autenticação real na API do SmarterASP.NET.
+    const resposta = await fazerLogin(email, senha);
+
+    // Confirma o usuário autenticado e seu perfil.
+    console.log('Login realizado:', {
+      id: resposta.usuario.id,
+      nome: resposta.usuario.nome,
+      perfil: resposta.usuario.perfil,
+    });
+
+    // Nunca exibir o token JWT no console.
+    // Na próxima etapa, vamos configurar seu
+    // armazenamento seguro e a sessão do usuário.
+
     router.replace('/home');
-      // router.replace('/home');
-    } catch {
-      Alert.alert('Erro', 'Não foi possível entrar. Tente novamente.');
-    } finally {
-      setCarregando(false);
+
+  } catch (erro) {
+    const mensagem =
+      erro instanceof Error
+        ? erro.message
+        : 'Não foi possível realizar o login.';
+
+    if (Platform.OS === 'web') {
+      window.alert(mensagem);
+    } else {
+      Alert.alert('Erro no login', mensagem);
     }
+  } finally {
+    setCarregando(false);
   }
+}
+
 
   return (
     <View style={styles.root}>

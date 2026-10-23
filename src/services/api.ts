@@ -5,7 +5,7 @@ if (!API_URL) {
   console.warn('EXPO_PUBLIC_API_URL não configurada.');
 }
 
-export const API_BASE_URL = API_URL?.replace(/\/$/, '') ?? '';
+export const API_BASE_URL = API_URL?.replace(/\/+$/, '') ?? '';
 
 export type PerfilUsuario =
   | 'AdmMaster'
