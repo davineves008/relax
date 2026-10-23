@@ -174,15 +174,9 @@ C:\Users\55519\Desktop\assets\style\relax\Relax.Api\bin\Debug\net10.0\runtimes\w
 C:\Users\55519\Desktop\assets\style\relax\Relax.Api\bin\Debug\net10.0\runtimes\win-x64\native\msalruntime.dll
 C:\Users\55519\Desktop\assets\style\relax\Relax.Api\bin\Debug\net10.0\runtimes\win-x86\native\msalruntime_x86.dll
 C:\Users\55519\Desktop\assets\style\relax\Relax.Api\bin\Debug\net10.0\runtimes\win\lib\net10.0\System.Security.Cryptography.Pkcs.dll
-C:\Users\55519\Desktop\assets\style\relax\Relax.Api\bin\Debug\net10.0\publish-teste\publish\web.config
 C:\Users\55519\Desktop\assets\style\relax\Relax.Api\bin\Debug\net10.0\publish-teste\web.config
 C:\Users\55519\Desktop\assets\style\relax\Relax.Api\bin\Debug\net10.0\publish-teste\appsettings.Development.json
 C:\Users\55519\Desktop\assets\style\relax\Relax.Api\bin\Debug\net10.0\publish-teste\appsettings.json
-C:\Users\55519\Desktop\assets\style\relax\Relax.Api\bin\Debug\net10.0\publish-teste\publish\appsettings.Development.json
-C:\Users\55519\Desktop\assets\style\relax\Relax.Api\bin\Debug\net10.0\publish-teste\publish\appsettings.json
-C:\Users\55519\Desktop\assets\style\relax\Relax.Api\bin\Debug\net10.0\publish-teste\publish\Relax.Api.deps.json
-C:\Users\55519\Desktop\assets\style\relax\Relax.Api\bin\Debug\net10.0\publish-teste\publish\Relax.Api.runtimeconfig.json
-C:\Users\55519\Desktop\assets\style\relax\Relax.Api\bin\Debug\net10.0\publish-teste\publish\Relax.Api.staticwebassets.endpoints.json
 C:\Users\55519\Desktop\assets\style\relax\Relax.Api\bin\Debug\net10.0\publish-teste\Relax.Api.deps.json
 C:\Users\55519\Desktop\assets\style\relax\Relax.Api\bin\Debug\net10.0\publish-teste\Relax.Api.runtimeconfig.json
 C:\Users\55519\Desktop\assets\style\relax\Relax.Api\bin\Debug\net10.0\publish-teste\Relax.Api.staticwebassets.endpoints.json
