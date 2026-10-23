@@ -22,6 +22,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Perfil, USUARIO_TESTE } from '@/constants/perfis';
+import { LIMITES, validarEmail, validarNome } from '@/constants/limites';
 
 const COLORS = {
   bgTop: '#0B1F1C',
@@ -151,12 +152,9 @@ export default function PerfilScreen() {
   }
 
   function salvar() {
-    if (nomeEdit.trim().length < 3) {
-      Alert.alert('Confira os dados', 'Digite seu nome completo (mínimo 3 letras).');
-      return;
-    }
-    if (!/\S+@\S+\.\S+/.test(emailEdit)) {
-      Alert.alert('Confira os dados', 'Digite um e-mail válido.');
+    const erro = validarNome(nomeEdit) ?? validarEmail(emailEdit);
+    if (erro) {
+      Alert.alert('Confira os dados', erro);
       return;
     }
     // TODO: enviar as alterações para a API
@@ -312,10 +310,20 @@ export default function PerfilScreen() {
                           placeholderTextColor={COLORS.muted}
                           autoCapitalize="words"
                           autoCorrect={false}
+                          maxLength={LIMITES.nome.max}
                           maxFontSizeMultiplier={1.2}
                           onFocus={() => setCampoFocado('nome')}
                           onBlur={() => setCampoFocado(null)}
                         />
+                        {nomeEdit.length >= LIMITES.nome.max * 0.8 && (
+                          <AppText
+                            style={[
+                              styles.contadorCampo,
+                              nomeEdit.length >= LIMITES.nome.max && { color: COLORS.danger },
+                            ]}>
+                            {nomeEdit.length}/{LIMITES.nome.max}
+                          </AppText>
+                        )}
                       </View>
 
                       <View style={[styles.inputWrapper, campoFocado === 'email' && styles.inputFocused]}>
@@ -327,16 +335,26 @@ export default function PerfilScreen() {
                         <TextInput
                           style={styles.input}
                           value={emailEdit}
-                          onChangeText={setEmailEdit}
+                          onChangeText={(t) => setEmailEdit(t.replace(/\s/g, ''))}
                           placeholder="Seu e-mail"
                           placeholderTextColor={COLORS.muted}
                           keyboardType="email-address"
                           autoCapitalize="none"
                           autoCorrect={false}
+                          maxLength={LIMITES.email.max}
                           maxFontSizeMultiplier={1.2}
                           onFocus={() => setCampoFocado('email')}
                           onBlur={() => setCampoFocado(null)}
                         />
+                        {emailEdit.length >= LIMITES.email.max * 0.8 && (
+                          <AppText
+                            style={[
+                              styles.contadorCampo,
+                              emailEdit.length >= LIMITES.email.max && { color: COLORS.danger },
+                            ]}>
+                            {emailEdit.length}/{LIMITES.email.max}
+                          </AppText>
+                        )}
                       </View>
 
                       <Pressable
@@ -632,6 +650,7 @@ function makeStyles(s: (n: number) => number) {
       includeFontPadding: false,
       ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : null),
     },
+    contadorCampo: { color: COLORS.muted, fontSize: s(12), fontWeight: '600' },
     buttonWrapper: {
       borderRadius: s(16),
       overflow: Platform.OS === 'android' ? 'hidden' : 'visible',

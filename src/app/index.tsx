@@ -20,6 +20,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LIMITES, validarEmail } from '@/constants/limites';
 
 const COLORS = {
   bgTop: '#0B1F1C',
@@ -61,6 +62,7 @@ type InputFieldProps = {
   keyboardType?: 'default' | 'email-address';
   rightElement?: React.ReactNode;
   iconSize: number;
+  maxLength?: number;
 };
 
 function InputField({
@@ -73,6 +75,7 @@ function InputField({
   keyboardType = 'default',
   rightElement,
   iconSize,
+  maxLength,
 }: InputFieldProps) {
   const [focado, setFocado] = useState(false);
 
@@ -89,6 +92,7 @@ function InputField({
         keyboardType={keyboardType}
         autoCapitalize="none"
         autoCorrect={false}
+        maxLength={maxLength}
         maxFontSizeMultiplier={1.2}
         onFocus={() => setFocado(true)}
         onBlur={() => setFocado(false)}
@@ -126,8 +130,8 @@ export default function LoginScreen() {
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [carregando, setCarregando] = useState(false);
 
-  const emailValido = /\S+@\S+\.\S+/.test(email);
-  const podeEntrar = emailValido && senha.length >= 6 && !carregando;
+  const emailValido = validarEmail(email) === null;
+  const podeEntrar = emailValido && senha.length >= LIMITES.senha.min && !carregando;
 
   const fade = useRef(new Animated.Value(0)).current;
   const slide = useRef(new Animated.Value(40)).current;
@@ -169,8 +173,7 @@ export default function LoginScreen() {
     try {
       // TODO: trocar pela chamada real à sua API
       await new Promise((r) => setTimeout(r, 1000));
-    router.replace('/home');
-      // router.replace('/home');
+      router.replace('/home');
     } catch {
       Alert.alert('Erro', 'Não foi possível entrar. Tente novamente.');
     } finally {
@@ -219,15 +222,15 @@ export default function LoginScreen() {
                     <Ionicons name="leaf" size={s(compact ? 30 : 38)} color="#06312C" />
                   </LinearGradient>
                 </Animated.View>
-               <AppText style={styles.brand}>
-  Relax<AppText style={styles.brandDot}>.</AppText>
-</AppText>
-<AppText style={styles.tagline}>Relaxe. Agende. Renove-se.</AppText>
-{!compact && (
-  <AppText style={styles.subtitle}>
-    Encontre os melhores profissionais de massagem perto de você
-  </AppText>
-)}
+                <AppText style={styles.brand}>
+                  Relax<AppText style={styles.brandDot}>.</AppText>
+                </AppText>
+                <AppText style={styles.tagline}>Relaxe. Agende. Renove-se.</AppText>
+                {!compact && (
+                  <AppText style={styles.subtitle}>
+                    Encontre os melhores profissionais de massagem perto de você
+                  </AppText>
+                )}
               </View>
 
               {/* Card glass */}
@@ -238,7 +241,8 @@ export default function LoginScreen() {
                   icon="mail-outline"
                   placeholder="Seu e-mail"
                   value={email}
-                  onChangeText={setEmail}
+                  onChangeText={(t) => setEmail(t.replace(/\s/g, ''))}
+                  maxLength={LIMITES.email.max}
                   keyboardType="email-address"
                 />
 
@@ -250,6 +254,7 @@ export default function LoginScreen() {
                   value={senha}
                   onChangeText={setSenha}
                   secure={!mostrarSenha}
+                  maxLength={LIMITES.senha.max}
                   rightElement={
                     <Pressable onPress={() => setMostrarSenha((v) => !v)} hitSlop={12}>
                       <Ionicons
@@ -292,17 +297,6 @@ export default function LoginScreen() {
                     )}
                   </LinearGradient>
                 </Pressable>
-
-                {/* Login social: some quando o teclado está aberto pra caber na tela */}
-                {!tecladoAberto && (
-                  <>
-                    <View style={styles.dividerRow}>
-                     
-                    </View>
-
-                    
-                  </>
-                )}
               </View>
 
               {/* Rodapé */}
@@ -368,14 +362,6 @@ function makeStyles(s: (n: number) => number, compact: boolean) {
       alignItems: 'center',
       justifyContent: 'center',
     },
-    title: {
-      color: COLORS.text,
-      fontSize: s(compact ? 24 : 30),
-      fontWeight: '800',
-      textAlign: 'center',
-      lineHeight: s(compact ? 30 : 36),
-      letterSpacing: -0.5,
-    },
     subtitle: {
       color: COLORS.muted,
       fontSize: s(15),
@@ -385,7 +371,7 @@ function makeStyles(s: (n: number) => number, compact: boolean) {
       paddingHorizontal: s(12),
     },
 
-        brand: {
+    brand: {
       color: COLORS.text,
       fontSize: s(compact ? 38 : 48),
       lineHeight: s(compact ? 44 : 56),
@@ -455,26 +441,6 @@ function makeStyles(s: (n: number) => number, compact: boolean) {
     },
     buttonText: { color: '#06312C', fontSize: s(17), fontWeight: '800' },
 
-    dividerRow: { flexDirection: 'row', alignItems: 'center', gap: s(12), marginTop: s(2) },
-    divider: { flex: 1, height: 1, backgroundColor: COLORS.glassBorder },
-    dividerText: { color: COLORS.muted, fontSize: s(12) },
-
-    socialRow: { flexDirection: 'row', gap: s(12) },
-    socialButton: {
-      flex: 1,
-      minHeight: Math.max(s(48), 46),
-      borderRadius: s(14),
-      borderWidth: 1,
-      borderColor: COLORS.glassBorder,
-      backgroundColor: COLORS.glass,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: s(8),
-      overflow: 'hidden',
-    },
-    socialText: { color: COLORS.text, fontWeight: '600', fontSize: s(15) },
-
     footer: {
       flexDirection: 'row',
       justifyContent: 'center',
@@ -485,6 +451,4 @@ function makeStyles(s: (n: number) => number, compact: boolean) {
     footerText: { color: COLORS.muted, fontSize: s(14) },
     footerLink: { color: COLORS.accent, fontSize: s(14), fontWeight: '700' },
   });
-
-
 }

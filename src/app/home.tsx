@@ -12,7 +12,7 @@ type Acao = {
   titulo: string;
   descricao: string;
   icone: keyof typeof Ionicons.glyphMap;
-  rota?: '/agendamento' | '/usuarios' | '/feedback'| '/reservas' | '/perfil';
+  rota?: '/agendamento' | '/usuarios' | '/feedback' | '/reservas' | '/perfil';
 };
 
 const ACOES: Record<Perfil, Acao[]> = {
@@ -21,7 +21,6 @@ const ACOES: Record<Perfil, Acao[]> = {
     { titulo: 'Minhas reservas', descricao: 'Acompanhe seus horários', icone: 'time-outline', rota: '/reservas' },
     { titulo: 'Avaliar atendimento', descricao: 'Compartilhe sua experiência', icone: 'star-outline', rota: '/feedback' },
     { titulo: 'Meu perfil', descricao: 'Seus dados pessoais', icone: 'person-outline', rota: '/perfil' },
-    
   ],
   aluno: [
     { titulo: 'Minha disponibilidade', descricao: 'Cadastre dias e horários', icone: 'calendar-outline', rota: '/agendamento' },
@@ -47,7 +46,18 @@ export default function HomeScreen() {
   // Estado provisório para testar os três perfis.
   // Na integração real, usar o perfil retornado pela autenticação.
   const [perfil, setPerfil] = useState<Perfil>(USUARIO_TESTE.perfil);
+
   const primeiroNome = USUARIO_TESTE.nome.trim().split(/\s+/)[0];
+  const iniciais = USUARIO_TESTE.nome
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join('')
+    .toUpperCase();
+
+  // TODO: na integração real, vem da API (notificações não lidas)
+  const temNovidade = true;
 
   function abrirAcao(acao: Acao) {
     if (acao.rota) {
@@ -74,8 +84,25 @@ export default function HomeScreen() {
               <Text style={styles.greeting}>Olá, {primeiroNome}!</Text>
               <Text style={styles.subtitle}>{TITULOS[perfil]}</Text>
             </View>
-            <View style={styles.avatar}>
-              <Ionicons name="person-outline" size={28} color="#2DD4BF" />
+
+            <View style={styles.headerAcoes}>
+              <Pressable
+                onPress={() => Alert.alert('Notificações', 'Em breve!')}
+                hitSlop={8}
+                style={styles.iconBtn}
+                accessibilityLabel="Notificações"
+              >
+                <Ionicons name="notifications-outline" size={22} color="#F0FDFA" />
+                {temNovidade && <View style={styles.badge} />}
+              </Pressable>
+
+              <Pressable
+                onPress={() => router.push('/perfil')}
+                style={styles.avatar}
+                accessibilityLabel="Abrir meu perfil"
+              >
+                <Text style={styles.avatarText}>{iniciais}</Text>
+              </Pressable>
             </View>
           </View>
 
@@ -147,7 +174,13 @@ const styles = StyleSheet.create({
   brandAccent: { color: '#F5C26B' },
   greeting: { color: '#F0FDFA', fontSize: 27, fontWeight: '800' },
   subtitle: { color: 'rgba(240,253,250,0.7)', fontSize: 14, marginTop: 5 },
+
+  headerAcoes: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  iconBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.09)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' },
+  badge: { position: 'absolute', top: 10, right: 11, width: 9, height: 9, borderRadius: 5, backgroundColor: '#F5C26B', borderWidth: 1.5, borderColor: '#0B1F1C' },
   avatar: { width: 54, height: 54, borderRadius: 27, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(45,212,191,0.13)', borderWidth: 1, borderColor: 'rgba(45,212,191,0.35)' },
+  avatarText: { color: '#2DD4BF', fontSize: 18, fontWeight: '800' },
+
   hero: { backgroundColor: 'rgba(255,255,255,0.09)', borderRadius: 24, padding: 22, borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)', marginBottom: 28 },
   heroTitle: { color: '#F0FDFA', fontSize: 23, fontWeight: '800', marginTop: 12 },
   heroDescription: { color: 'rgba(240,253,250,0.75)', fontSize: 14, lineHeight: 21, marginTop: 8, marginBottom: 20 },

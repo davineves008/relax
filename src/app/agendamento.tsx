@@ -125,10 +125,7 @@ export default function AgendamentoScreen() {
               }}
               activeOpacity={0.8}
             >
-              <View style={styles.agendaIcone}>
-                <Text style={styles.iconeTexto}>+</Text>
-              </View>
-
+             
               <View style={styles.agendaInfo}>
                 <Text style={styles.agendaNome}>{item.nome}</Text>
                 <Text style={styles.professor}>{item.professor}</Text>

@@ -21,6 +21,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LIMITES, validarEmail, validarNome, validarSenha } from '@/constants/limites';
 
 const COLORS = {
   bgTop: '#0B1F1C',
@@ -73,6 +74,7 @@ type InputFieldProps = {
   keyboardType?: KeyboardTypeOptions;
   autoCapitalize?: 'none' | 'words';
   rightElement?: React.ReactNode;
+  maxLength?: number;
 };
 
 function InputField({
@@ -87,8 +89,11 @@ function InputField({
   keyboardType = 'default',
   autoCapitalize = 'none',
   rightElement,
+  maxLength,
 }: InputFieldProps) {
   const [focado, setFocado] = useState(false);
+  const limite = maxLength ?? Infinity;
+  const perto = value.length >= limite * 0.8;
 
   return (
     <View
@@ -112,10 +117,20 @@ function InputField({
         keyboardType={keyboardType}
         autoCapitalize={autoCapitalize}
         autoCorrect={false}
+        maxLength={maxLength}
         maxFontSizeMultiplier={1.2}
         onFocus={() => setFocado(true)}
         onBlur={() => setFocado(false)}
       />
+      {perto && (
+        <AppText
+          style={[
+            styles.contadorCampo,
+            value.length >= limite && { color: COLORS.danger },
+          ]}>
+          {value.length}/{maxLength}
+        </AppText>
+      )}
       {rightElement}
     </View>
   );
@@ -150,9 +165,14 @@ export default function CadastroScreen() {
   const [mostrarConfirmacao, setMostrarConfirmacao] = useState(false);
   const [carregando, setCarregando] = useState(false);
 
-  const nomeValido = nome.trim().length >= 3;
-  const emailValido = /\S+@\S+\.\S+/.test(email);
-  const senhaValida = senha.length >= 6;
+  // Validações (as mensagens vêm de constants/limites.ts)
+  const erroNome = validarNome(nome);
+  const erroEmail = validarEmail(email);
+  const erroSenha = validarSenha(senha);
+  const nomeValido = erroNome === null;
+  const emailValido = erroEmail === null;
+  const senhaValida = erroSenha === null;
+
   const senhasIguais = senha === confirmarSenha;
   const confirmacaoPreenchida = confirmarSenha.length > 0;
   const erroConfirmacao = confirmacaoPreenchida && !senhasIguais;
@@ -197,9 +217,9 @@ export default function CadastroScreen() {
   }, [fade, slide, float]);
 
   function validar() {
-    if (!nomeValido) return 'Digite seu nome completo (mínimo 3 letras).';
-    if (!emailValido) return 'Digite um e-mail válido.';
-    if (!senhaValida) return 'A senha precisa ter pelo menos 6 caracteres.';
+    if (erroNome) return erroNome;
+    if (erroEmail) return erroEmail;
+    if (erroSenha) return erroSenha;
     if (!confirmacaoPreenchida) return 'Confirme sua senha.';
     if (!senhasIguais) return 'As senhas não coincidem.';
     return null;
@@ -299,6 +319,7 @@ export default function CadastroScreen() {
                   value={nome}
                   onChangeText={setNome}
                   autoCapitalize="words"
+                  maxLength={LIMITES.nome.max}
                 />
 
                 <InputField
@@ -307,7 +328,8 @@ export default function CadastroScreen() {
                   icon="mail-outline"
                   placeholder="Seu e-mail"
                   value={email}
-                  onChangeText={setEmail}
+                  onChangeText={(t) => setEmail(t.replace(/\s/g, ''))}
+                  maxLength={LIMITES.email.max}
                   keyboardType="email-address"
                 />
 
@@ -320,6 +342,7 @@ export default function CadastroScreen() {
                     value={senha}
                     onChangeText={setSenha}
                     secure={!mostrarSenha}
+                    maxLength={LIMITES.senha.max}
                     rightElement={
                       <Pressable onPress={() => setMostrarSenha((v) => !v)} hitSlop={12}>
                         <Ionicons
@@ -354,6 +377,7 @@ export default function CadastroScreen() {
                     onChangeText={setConfirmarSenha}
                     secure={!mostrarConfirmacao}
                     erro={erroConfirmacao}
+                    maxLength={LIMITES.senha.max}
                     rightElement={
                       <Pressable onPress={() => setMostrarConfirmacao((v) => !v)} hitSlop={12}>
                         <Ionicons
@@ -471,14 +495,6 @@ function makeStyles(s: (n: number) => number, compact: boolean) {
       alignItems: 'center',
       justifyContent: 'center',
     },
-    title: {
-      color: COLORS.text,
-      fontSize: s(compact ? 24 : 30),
-      fontWeight: '800',
-      textAlign: 'center',
-      lineHeight: s(compact ? 30 : 36),
-      letterSpacing: -0.5,
-    },
     subtitle: {
       color: COLORS.muted,
       fontSize: s(15),
@@ -543,6 +559,7 @@ function makeStyles(s: (n: number) => number, compact: boolean) {
       includeFontPadding: false,
       ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : null),
     },
+    contadorCampo: { color: COLORS.muted, fontSize: s(12), fontWeight: '600' },
 
     strengthRow: {
       flexDirection: 'row',

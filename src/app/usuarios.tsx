@@ -19,6 +19,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LIMITES } from '@/constants/limites';
 
 const COLORS = {
   bgTop: '#0B1F1C',
@@ -255,6 +256,7 @@ export default function UsuariosScreen() {
               placeholderTextColor={COLORS.muted}
               autoCapitalize="none"
               autoCorrect={false}
+              maxLength={LIMITES.busca.max}
               maxFontSizeMultiplier={1.2}
               onFocus={() => setBuscaFocada(true)}
               onBlur={() => setBuscaFocada(false)}
