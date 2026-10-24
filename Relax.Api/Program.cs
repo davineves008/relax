@@ -15,24 +15,19 @@ var builder = WebApplication.CreateBuilder(args);
 // 1. CONFIGURAÇÕES DO AMBIENTE
 // ======================================
 
-// Prioriza as variáveis exclusivas do Relax.
-//
-// Em desenvolvimento, utiliza os
-// User Secrets como alternativa.
-//
-// Em produção, exige as variáveis RELAX_
-// para evitar conflitos com o SystemsI.
+// Produção: utiliza variáveis RELAX_.
+// Desenvolvimento: permite User Secrets.
 
 string ObterConfiguracao(
     string variavelRelax,
     string configuracaoLocal)
 {
     var valorRelax =
-        builder.Configuration[variavelRelax];
+        Environment.GetEnvironmentVariable(variavelRelax);
 
     if (!string.IsNullOrWhiteSpace(valorRelax))
     {
-        return valorRelax;
+        return valorRelax.Trim();
     }
 
     if (!builder.Environment.IsDevelopment())
@@ -52,7 +47,7 @@ string ObterConfiguracao(
         );
     }
 
-    return valorLocal;
+    return valorLocal.Trim();
 }
 
 // ======================================
@@ -71,8 +66,7 @@ var connectionString = ObterConfiguracao(
 );
 
 builder.Services.AddDbContext<RelaxDbContext>(
-    options =>
-        options.UseSqlServer(connectionString)
+    options => options.UseSqlServer(connectionString)
 );
 
 // ======================================
@@ -81,8 +75,14 @@ builder.Services.AddDbContext<RelaxDbContext>(
 
 builder.Services.AddControllers();
 
-// Permite requisições da aplicação
-// React Native Web em desenvolvimento.
+builder.Services.AddOpenApi();
+
+// ======================================
+// 4. CONFIGURAÇÃO CORS
+// ======================================
+
+// Permite acesso do React Native Web
+// durante o desenvolvimento local.
 
 builder.Services.AddCors(options =>
 {
@@ -95,15 +95,9 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Documentação OpenAPI.
-builder.Services.AddOpenApi();
-
 // ======================================
-// 4. SEGURANÇA DAS SENHAS
+// 5. SEGURANÇA DAS SENHAS
 // ======================================
-
-// Responsável por gerar e validar
-// hashes seguros das senhas.
 
 builder.Services.AddScoped<
     IPasswordHasher<Usuario>,
@@ -111,17 +105,14 @@ builder.Services.AddScoped<
 >();
 
 // ======================================
-// 5. CONFIGURAÇÕES JWT
+// 6. CONFIGURAÇÕES JWT
 // ======================================
 
-// Variáveis cadastradas no SmarterASP.NET:
+// Variáveis do SmarterASP.NET:
 //
 // RELAX_Jwt__Key
 // RELAX_Jwt__Issuer
 // RELAX_Jwt__Audience
-//
-// No desenvolvimento local, utiliza
-// Jwt:Key, Jwt:Issuer e Jwt:Audience.
 
 var jwtKey = ObterConfiguracao(
     "RELAX_Jwt__Key",
@@ -138,25 +129,23 @@ var jwtAudience = ObterConfiguracao(
     "Jwt:Audience"
 );
 
-// Converte a chave JWT de Base64
-// para um conjunto de bytes.
+// ======================================
+// 7. VALIDAÇÃO DA CHAVE JWT
+// ======================================
 
 byte[] jwtKeyBytes;
 
 try
 {
-    jwtKeyBytes =
-        Convert.FromBase64String(jwtKey);
+    jwtKeyBytes = Convert.FromBase64String(jwtKey);
 }
-catch (FormatException)
+catch (FormatException ex)
 {
     throw new InvalidOperationException(
-        "A chave JWT não está em formato Base64 válido."
+        "A chave JWT não está em formato Base64 válido.",
+        ex
     );
 }
-
-// Exige pelo menos 32 bytes
-// para a chave de assinatura.
 
 if (jwtKeyBytes.Length < 32)
 {
@@ -166,7 +155,7 @@ if (jwtKeyBytes.Length < 32)
 }
 
 // ======================================
-// 6. AUTENTICAÇÃO JWT
+// 8. AUTENTICAÇÃO JWT
 // ======================================
 
 builder.Services
@@ -178,96 +167,63 @@ builder.Services
         options.TokenValidationParameters =
             new TokenValidationParameters
             {
-                // Validação do emissor.
                 ValidateIssuer = true,
                 ValidIssuer = jwtIssuer,
 
-                // Validação do destinatário.
                 ValidateAudience = true,
                 ValidAudience = jwtAudience,
 
-                // Validação da assinatura.
                 ValidateIssuerSigningKey = true,
 
                 IssuerSigningKey =
-                    new SymmetricSecurityKey(
-                        jwtKeyBytes
-                    ),
+                    new SymmetricSecurityKey(jwtKeyBytes),
 
-                // Validação da expiração.
                 ValidateLifetime = true,
 
-                // Identificação do usuário.
                 NameClaimType = ClaimTypes.Name,
-
-                // Identificação do perfil.
                 RoleClaimType = ClaimTypes.Role,
 
-                // Tolerância de horário.
-                ClockSkew =
-                    TimeSpan.FromMinutes(1)
+                ClockSkew = TimeSpan.FromMinutes(1)
             };
 
         // ======================================
-        // 7. VALIDAÇÃO DO USUÁRIO NO BANCO
+        // 9. VALIDAR USUÁRIO NO BANCO
         // ======================================
 
         options.Events = new JwtBearerEvents
         {
             OnTokenValidated = async context =>
             {
-                // Recupera o ID do usuário.
                 var idTexto = context.Principal?
-                    .FindFirst(
-                        ClaimTypes.NameIdentifier
-                    )?
+                    .FindFirst(ClaimTypes.NameIdentifier)?
                     .Value;
 
-                // Recupera o perfil do JWT.
                 var perfilToken = context.Principal?
-                    .FindFirst(
-                        ClaimTypes.Role
-                    )?
+                    .FindFirst(ClaimTypes.Role)?
                     .Value;
 
-                // Valida o identificador.
                 if (!int.TryParse(
                     idTexto,
                     out var usuarioId))
                 {
-                    context.Fail(
-                        "Usuário inválido."
-                    );
-
+                    context.Fail("Usuário inválido.");
                     return;
                 }
 
-                // Obtém o banco de dados.
                 var db = context.HttpContext
                     .RequestServices
-                    .GetRequiredService<
-                        RelaxDbContext
-                    >();
+                    .GetRequiredService<RelaxDbContext>();
 
-                // Consulta o usuário.
                 var usuario = await db.Usuarios
                     .AsNoTracking()
                     .FirstOrDefaultAsync(
                         u => u.Id == usuarioId,
-                        context.HttpContext
-                            .RequestAborted
+                        context.HttpContext.RequestAborted
                     );
-
-                // Rejeita o token quando:
-                //
-                // - O usuário não existe;
-                // - Está inativo;
-                // - O perfil foi alterado.
 
                 if (usuario == null ||
                     !usuario.Ativo ||
-                    usuario.Perfil.ToString()
-                        != perfilToken)
+                    usuario.Perfil.ToString() != perfilToken)
                 {
                     context.Fail(
                         "Usuário inativo ou perfil alterado."
@@ -280,37 +236,47 @@ builder.Services
     });
 
 // ======================================
-// 8. AUTORIZAÇÃO
+// 10. AUTORIZAÇÃO
 // ======================================
 
-// Permite utilizar:
-//
+// Permite:
 // [Authorize]
-//
 // [Authorize(Roles = "AdmMaster")]
-//
 // [Authorize(Roles = "AdmMaster,Professor")]
-//
-// Os demais perfis continuam definidos
-// pelos atributos dos controllers.
 
 builder.Services.AddAuthorization();
 
 // ======================================
-// 9. CONSTRUIR A APLICAÇÃO
+// 11. CONSTRUIR A APLICAÇÃO
 // ======================================
 
 var app = builder.Build();
 
 // ======================================
-// 10. CONFIGURAÇÃO DO AMBIENTE
+// 12. VERIFICAÇÃO PÚBLICA DA API
+// ======================================
+
+// GET /api/health
+// Não consulta o banco de dados.
+
+app.MapGet("/api/health", () =>
+{
+    return Results.Ok(new
+    {
+        status = "online",
+        aplicacao = "Relax API",
+        mensagem = "API funcionando no servidor!"
+    });
+})
+.AllowAnonymous();
+
+// ======================================
+// 13. CONFIGURAÇÕES DE DESENVOLVIMENTO
 // ======================================
 
 if (app.Environment.IsDevelopment())
 {
-    // Disponibiliza a documentação
-    // OpenAPI apenas em desenvolvimento.
-
+    // Documentação OpenAPI.
     app.MapOpenApi();
 
     // ==================================
@@ -324,8 +290,7 @@ if (app.Environment.IsDevelopment())
             return Results.Ok(new
             {
                 ambienteConfigurado =
-                    config["RELAX_TESTE"]
-                        == "funcionando"
+                    config["RELAX_TESTE"] == "funcionando"
             });
         }
     );
@@ -340,9 +305,8 @@ if (app.Environment.IsDevelopment())
         {
             try
             {
-                bool conectado =
-                    await db.Database
-                        .CanConnectAsync();
+                var conectado =
+                    await db.Database.CanConnectAsync();
 
                 if (conectado)
                 {
@@ -370,40 +334,32 @@ if (app.Environment.IsDevelopment())
 }
 
 // ======================================
-// 11. HTTPS E SEGURANÇA
+// 14. HTTPS E SEGURANÇA
 // ======================================
 
-// Redireciona HTTP para HTTPS.
 app.UseHttpsRedirection();
 
-// Aplica a política CORS.
 app.UseCors("RelaxWeb");
 
-// Identifica o usuário pelo JWT.
 app.UseAuthentication();
 
-// Verifica as permissões.
 app.UseAuthorization();
 
 // ======================================
-// 12. ROTAS DOS CONTROLLERS
+// 15. ROTAS DOS CONTROLLERS
 // ======================================
-
-// Habilita as rotas dos controllers,
-// incluindo autenticação e usuários.
 
 app.MapControllers();
 
 // ======================================
-// 13. INICIALIZAÇÃO DO ADM MASTER
+// 16. INICIALIZAÇÃO DO ADM MASTER
 // ======================================
 
-// O inicializador só deve criar
-// o ADM Master quando a configuração
-// BootstrapAdmin:Enabled estiver ativa.
+// O inicializador deve respeitar
+// BootstrapAdmin:Enabled.
 //
 // Em produção, manter desabilitado
-// após a criação do primeiro administrador.
+// após criar o primeiro ADM Master.
 
 await AdmMasterInitializer.CriarAsync(
     app.Services,
@@ -411,7 +367,7 @@ await AdmMasterInitializer.CriarAsync(
 );
 
 // ======================================
-// 14. INICIAR A API
+// 17. INICIAR A API
 // ======================================
 
 app.Run();

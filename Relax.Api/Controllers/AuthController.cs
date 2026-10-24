@@ -1,10 +1,13 @@
 
+using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Mail;
 using System.Security.Claims;
-using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Relax.Api.Data;
 using Relax.Api.Models;
@@ -18,16 +21,23 @@ public class AuthController : ControllerBase
     private readonly RelaxDbContext _context;
     private readonly IPasswordHasher<Usuario> _passwordHasher;
     private readonly IConfiguration _configuration;
+    private readonly ILogger<AuthController> _logger;
 
     public AuthController(
         RelaxDbContext context,
         IPasswordHasher<Usuario> passwordHasher,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        ILogger<AuthController> logger)
     {
         _context = context;
         _passwordHasher = passwordHasher;
         _configuration = configuration;
+        _logger = logger;
     }
+
+    // =====================================
+    // 1. MODELOS DAS REQUISIÇÕES
+    // =====================================
 
     public record CadastroRequest(
         string Nome,
@@ -39,6 +49,36 @@ public class AuthController : ControllerBase
         string Email,
         string Senha
     );
+
+    // =====================================
+    // 2. CONFIGURAÇÕES JWT
+    // =====================================
+
+    private string ObterConfiguracao(
+        string variavelAmbiente,
+        string configuracaoLocal)
+    {
+        var valor = Environment.GetEnvironmentVariable(
+            variavelAmbiente);
+
+        if (string.IsNullOrWhiteSpace(valor))
+        {
+            valor = _configuration[configuracaoLocal];
+        }
+
+        if (string.IsNullOrWhiteSpace(valor))
+        {
+            throw new InvalidOperationException(
+                $"Configuração obrigatória ausente: {configuracaoLocal}");
+        }
+
+        return valor.Trim();
+    }
+
+    // =====================================
+    // 3. CADASTRO DE USUÁRIO
+    // POST /api/auth/cadastro
+    // =====================================
 
     [HttpPost("cadastro")]
     public async Task<IActionResult> Cadastro(
@@ -57,8 +97,9 @@ public class AuthController : ControllerBase
         var nome = request.Nome.Trim();
         var email = request.Email.Trim().ToLowerInvariant();
 
-        if (nome.Length > 150 || email.Length > 255 ||
-            !System.Net.Mail.MailAddress.TryCreate(email, out var endereco) ||
+        if (nome.Length > 150 ||
+            email.Length > 255 ||
+            !MailAddress.TryCreate(email, out var endereco) ||
             endereco.Address != email)
         {
             return BadRequest(new
@@ -96,7 +137,10 @@ public class AuthController : ControllerBase
         };
 
         usuario.PasswordHash =
-            _passwordHasher.HashPassword(usuario, request.Senha);
+            _passwordHasher.HashPassword(
+                usuario,
+                request.Senha
+            );
 
         _context.Usuarios.Add(usuario);
 
@@ -104,8 +148,12 @@ public class AuthController : ControllerBase
         {
             await _context.SaveChangesAsync();
         }
-        catch (DbUpdateException)
+        catch (DbUpdateException ex)
         {
+            _logger.LogWarning(
+                ex,
+                "Falha ao salvar cadastro de usuário.");
+
             return Conflict(new
             {
                 mensagem = "Não foi possível concluir o cadastro. Verifique o e-mail informado."
@@ -125,11 +173,18 @@ public class AuthController : ControllerBase
         });
     }
 
+    // =====================================
+    // 4. LOGIN E AUTENTICAÇÃO JWT
+    // POST /api/auth/login
+    // =====================================
+
     [HttpPost("login")]
     public async Task<IActionResult> Login(
         [FromBody] LoginRequest request)
     {
-        var email = request.Email?.Trim().ToLowerInvariant();
+        var email = request.Email?
+            .Trim()
+            .ToLowerInvariant();
 
         if (string.IsNullOrWhiteSpace(email) ||
             string.IsNullOrEmpty(request.Senha))
@@ -140,6 +195,7 @@ public class AuthController : ControllerBase
             });
         }
 
+        // Consulta o usuário no SQL Server.
         var usuario = await _context.Usuarios
             .FirstOrDefaultAsync(u => u.Email == email);
 
@@ -151,11 +207,13 @@ public class AuthController : ControllerBase
             });
         }
 
-        var resultado = _passwordHasher.VerifyHashedPassword(
-            usuario,
-            usuario.PasswordHash,
-            request.Senha
-        );
+        // Verifica a senha armazenada como hash.
+        var resultado =
+            _passwordHasher.VerifyHashedPassword(
+                usuario,
+                usuario.PasswordHash,
+                request.Senha
+            );
 
         if (resultado == PasswordVerificationResult.Failed)
         {
@@ -165,16 +223,73 @@ public class AuthController : ControllerBase
             });
         }
 
+        // =====================================
+        // 5. CLAIMS DO USUÁRIO
+        // =====================================
+
         var claims = new List<Claim>
         {
-            new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
-            new(ClaimTypes.Name, usuario.Nome),
-            new(ClaimTypes.Email, usuario.Email),
-            new(ClaimTypes.Role, usuario.Perfil.ToString())
+            new(
+                ClaimTypes.NameIdentifier,
+                usuario.Id.ToString()
+            ),
+            new(
+                ClaimTypes.Name,
+                usuario.Nome
+            ),
+            new(
+                ClaimTypes.Email,
+                usuario.Email
+            ),
+            new(
+                ClaimTypes.Role,
+                usuario.Perfil.ToString()
+            )
         };
 
+        // =====================================
+        // 6. CONFIGURAÇÕES JWT
+        // =====================================
+
+        var jwtKey = ObterConfiguracao(
+            "RELAX_Jwt__Key",
+            "Jwt:Key"
+        );
+
+        var jwtIssuer = ObterConfiguracao(
+            "RELAX_Jwt__Issuer",
+            "Jwt:Issuer"
+        );
+
+        var jwtAudience = ObterConfiguracao(
+            "RELAX_Jwt__Audience",
+            "Jwt:Audience"
+        );
+
+        // A chave JWT está codificada em Base64.
+        byte[] chaveBytes;
+
+        try
+        {
+            chaveBytes = Convert.FromBase64String(jwtKey);
+        }
+        catch (FormatException ex)
+        {
+            throw new InvalidOperationException(
+                "A configuração JWT contém uma chave Base64 inválida.",
+                ex
+            );
+        }
+
+        if (chaveBytes.Length < 32)
+        {
+            throw new InvalidOperationException(
+                "A chave JWT deve possuir pelo menos 256 bits."
+            );
+        }
+
         var chave = new SymmetricSecurityKey(
-            Convert.FromBase64String(_configuration["Jwt:Key"]!)
+            chaveBytes
         );
 
         var credenciais = new SigningCredentials(
@@ -182,19 +297,31 @@ public class AuthController : ControllerBase
             SecurityAlgorithms.HmacSha256
         );
 
+        // =====================================
+        // 7. GERAÇÃO DO TOKEN
+        // =====================================
+
         var expiracao = DateTime.UtcNow.AddHours(2);
 
         var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
+            issuer: jwtIssuer,
+            audience: jwtAudience,
             claims: claims,
             expires: expiracao,
             signingCredentials: credenciais
         );
 
+        var tokenGerado =
+            new JwtSecurityTokenHandler()
+                .WriteToken(token);
+
+        // =====================================
+        // 8. RESPOSTA DO LOGIN
+        // =====================================
+
         return Ok(new
         {
-            token = new JwtSecurityTokenHandler().WriteToken(token),
+            token = tokenGerado,
             expiracao,
             usuario = new
             {

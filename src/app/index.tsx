@@ -1,6 +1,6 @@
-import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -165,21 +165,22 @@ export default function LoginScreen() {
       ])
     ).start();
   }, [fade, slide, float]);
+async function handleLogin() {
+  if (!podeEntrar) return;
 
-  async function handleLogin() {
-    if (!podeEntrar) return;
-    Keyboard.dismiss();
-    setCarregando(true);
-    try {
-      // TODO: trocar pela chamada real à sua API
-      await new Promise((r) => setTimeout(r, 1000));
-      router.replace('/home');
-    } catch {
-      Alert.alert('Erro', 'Não foi possível entrar. Tente novamente.');
-    } finally {
-      setCarregando(false);
-    }
+  Keyboard.dismiss();
+  setCarregando(true);
+
+  try {
+    // TODO: trocar pela chamada real à sua API
+    await new Promise((r) => setTimeout(r, 1000));
+    router.replace('/home');
+  } catch {
+    Alert.alert('Erro', 'Não foi possível entrar. Tente novamente.');
+  } finally {
+    setCarregando(false);
   }
+}
 
   return (
     <View style={styles.root}>
