@@ -1,3 +1,5 @@
+import { LIMITES, validarEmail } from '@/constants/limites';
+import { fazerLogin } from '@/services/api';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -20,7 +22,6 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LIMITES, validarEmail } from '@/constants/limites';
 
 const COLORS = {
   bgTop: '#0B1F1C',
@@ -165,6 +166,7 @@ export default function LoginScreen() {
       ])
     ).start();
   }, [fade, slide, float]);
+
 async function handleLogin() {
   if (!podeEntrar) return;
 
@@ -172,11 +174,32 @@ async function handleLogin() {
   setCarregando(true);
 
   try {
-    // TODO: trocar pela chamada real à sua API
-    await new Promise((r) => setTimeout(r, 1000));
+    // Autenticação real pela API ASP.NET Core
+    const resposta = await fazerLogin(email, senha);
+
+    if (!resposta.token || !resposta.usuario) {
+      throw new Error('Resposta de autenticação inválida.');
+    }
+
+    console.log('Login realizado com sucesso!');
+    console.log('Usuário:', resposta.usuario.nome);
+    console.log('Perfil:', resposta.usuario.perfil);
+
+    // Navega somente após a API validar o usuário
     router.replace('/home');
-  } catch {
-    Alert.alert('Erro', 'Não foi possível entrar. Tente novamente.');
+
+  } catch (erro) {
+    const mensagem =
+      erro instanceof Error
+        ? erro.message
+        : 'Não foi possível realizar o login.';
+
+    if (Platform.OS === 'web') {
+      window.alert(mensagem);
+    } else {
+      Alert.alert('Erro no login', mensagem);
+    }
+
   } finally {
     setCarregando(false);
   }

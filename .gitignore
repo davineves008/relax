@@ -1,15 +1,22 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
-# dependencies
+# =====================================
+# DEPENDÊNCIAS
+# =====================================
 node_modules/
 
-# Expo
+# =====================================
+# EXPO / REACT NATIVE
+# =====================================
 .expo/
 dist/
 web-build/
 expo-env.d.ts
 
-# Native
+# Pastas nativas geradas pelo Expo
+/ios/
+/android/
+
+# Arquivos nativos e certificados
 .kotlin/
 *.orig.*
 *.jks
@@ -18,41 +25,44 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 
-# Metro
+# =====================================
+# METRO / DEBUG
+# =====================================
 .metro-health-check*
-
-# debug
 npm-debug.*
 yarn-debug.*
 yarn-error.*
 
-# macOS
+# =====================================
+# SISTEMA OPERACIONAL
+# =====================================
 .DS_Store
 *.pem
 
-# local env files
+# =====================================
+# VARIÁVEIS DE AMBIENTE
+# =====================================
+.env
 .env*.local
+!.env.example
 
-# typescript
+# =====================================
+# TYPESCRIPT
+# =====================================
 *.tsbuildinfo
 
-example
-
-# generated native folders
-/ios
-/android
-
 # =====================================
-# ASP.NET Core / .NET 10
+# ASP.NET CORE / .NET 10 - RELAX.API
 # =====================================
 
+# Arquivos gerados durante compilação
 **/bin/
 **/obj/
 
-# Visual Studio
+# Configurações locais do Visual Studio
 .vs/
 *.user
 *.suo
 
-# Publicacao temporaria
+# Arquivos de publicação temporários
 **/publish-teste/
