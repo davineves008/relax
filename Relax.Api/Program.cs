@@ -61,9 +61,12 @@ string ObterConfiguracao(
 // ConnectionStrings:DefaultConnection
 
 var connectionString = ObterConfiguracao(
+    
     "RELAX_ConnectionString",
     "ConnectionStrings:DefaultConnection"
 );
+var csb = new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(connectionString);
+Console.WriteLine($"[DEBUG] Servidor: {csb.DataSource} | Banco: {csb.InitialCatalog} | Usuário: {csb.UserID} | Tamanho da senha: {csb.Password.Length}");
 
 builder.Services.AddDbContext<RelaxDbContext>(
     options => options.UseSqlServer(connectionString)
@@ -89,7 +92,11 @@ builder.Services.AddCors(options =>
     options.AddPolicy("RelaxWeb", policy =>
     {
         policy
-            .WithOrigins("http://localhost:8081")
+            .WithOrigins(
+                "http://localhost:8081",
+                "http://localhost:19006",
+                "http://localhost:8082"
+            )
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
