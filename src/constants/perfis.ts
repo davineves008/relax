@@ -1,14 +1,11 @@
-export type Perfil = 'professor' | 'aluno' | 'cliente';
+
+import type { PerfilUsuario } from '@/services/api';
+
+export type Perfil = PerfilUsuario;
 
 export type UsuarioLogado = {
-  id: string;
+  id: number;
   nome: string;
+  email: string;
   perfil: Perfil;
-};
-
-// Apenas para testar a interface. Substituir pelo usuário autenticado depois.
-export const USUARIO_TESTE: UsuarioLogado = {
-  id: 'teste-1',
-  nome: 'Maria Souza',
-  perfil: 'cliente',
 };

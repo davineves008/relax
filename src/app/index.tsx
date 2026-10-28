@@ -1,4 +1,5 @@
 import { LIMITES, validarEmail } from '@/constants/limites';
+import { useAuth } from '@/contexts/AuthContext';
 import { fazerLogin } from '@/services/api';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -103,21 +104,42 @@ function InputField({
   );
 }
 
+
 export default function LoginScreen() {
+  // Acessa o contexto de autenticação
+  const { entrar } = useAuth();
+
   const { width, height } = useWindowDimensions();
   const [tecladoAberto, setTecladoAberto] = useState(false);
 
   // Detecta o teclado para liberar espaço (a tela não rola)
   useEffect(() => {
-    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
-    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
-    const show = Keyboard.addListener(showEvent, () => setTecladoAberto(true));
-    const hide = Keyboard.addListener(hideEvent, () => setTecladoAberto(false));
+    const showEvent =
+      Platform.OS === 'ios'
+        ? 'keyboardWillShow'
+        : 'keyboardDidShow';
+
+    const hideEvent =
+      Platform.OS === 'ios'
+        ? 'keyboardWillHide'
+        : 'keyboardDidHide';
+
+    const show = Keyboard.addListener(
+      showEvent,
+      () => setTecladoAberto(true)
+    );
+
+    const hide = Keyboard.addListener(
+      hideEvent,
+      () => setTecladoAberto(false)
+    );
+
     return () => {
       show.remove();
       hide.remove();
     };
   }, []);
+
 
   // Escala considera largura E altura, pra tudo caber na tela sem rolar
   const scale = Math.min(Math.max(Math.min(width / 390, height / 800), 0.7), 1.2);
@@ -167,6 +189,7 @@ export default function LoginScreen() {
     ).start();
   }, [fade, slide, float]);
 
+
 async function handleLogin() {
   if (!podeEntrar) return;
 
@@ -174,18 +197,22 @@ async function handleLogin() {
   setCarregando(true);
 
   try {
-    // Autenticação real pela API ASP.NET Core
+    // Autenticação real na API ASP.NET Core
     const resposta = await fazerLogin(email, senha);
 
+    // Confirma que a API retornou os dados necessários
     if (!resposta.token || !resposta.usuario) {
       throw new Error('Resposta de autenticação inválida.');
     }
+
+    // Salva o usuário e o JWT no AuthContext
+    entrar(resposta);
 
     console.log('Login realizado com sucesso!');
     console.log('Usuário:', resposta.usuario.nome);
     console.log('Perfil:', resposta.usuario.perfil);
 
-    // Navega somente após a API validar o usuário
+    // Abre a Home após autenticação
     router.replace('/home');
 
   } catch (erro) {
@@ -204,6 +231,7 @@ async function handleLogin() {
     setCarregando(false);
   }
 }
+
 
   return (
     <View style={styles.root}>

@@ -1,3 +1,6 @@
+import { LIMITES, validarEmail, validarNome } from '@/constants/limites';
+import type { Perfil } from '@/constants/perfis';
+import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -20,9 +23,6 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-import { Perfil, USUARIO_TESTE } from '@/constants/perfis';
-import { LIMITES, validarEmail, validarNome } from '@/constants/limites';
 
 const COLORS = {
   bgTop: '#0B1F1C',
@@ -55,9 +55,10 @@ function AppText(props: TextProps) {
 }
 
 const PERFIL_LABEL: Record<Perfil, string> = {
-  cliente: 'Cliente',
-  aluno: 'Aluno',
-  professor: 'Professor',
+  Cliente: 'Cliente',
+  Aluno: 'Aluno',
+  Professor: 'Professor',
+  AdmMaster: 'Administrador Master',
 };
 
 function iniciais(nome: string) {
@@ -110,15 +111,22 @@ export default function PerfilScreen() {
   const styles = useMemo(() => makeStyles(s), [scale]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Dados provisórios; na integração real vêm da autenticação / API
-  const [nome, setNome] = useState(USUARIO_TESTE.nome);
-  const [email, setEmail] = useState('seu.email@exemplo.com');
-  const perfil: Perfil = USUARIO_TESTE.perfil;
+  const { usuario, sair: encerrarSessao } = useAuth();
 
+const nome = usuario?.nome ?? '';
+const email = usuario?.email ?? '';
+const perfil: Perfil = usuario?.perfil ?? 'Cliente';
   // edição
   const [editando, setEditando] = useState(false);
   const [nomeEdit, setNomeEdit] = useState(nome);
   const [emailEdit, setEmailEdit] = useState(email);
   const [campoFocado, setCampoFocado] = useState<'nome' | 'email' | null>(null);
+  useEffect(() => {
+  if (!editando) {
+    setNomeEdit(nome);
+    setEmailEdit(email);
+  }
+}, [nome, email, editando]);
 
   // preferências
   const [notificacoes, setNotificacoes] = useState(true);
@@ -152,28 +160,52 @@ export default function PerfilScreen() {
   }
 
   function salvar() {
-    const erro = validarNome(nomeEdit) ?? validarEmail(emailEdit);
-    if (erro) {
-      Alert.alert('Confira os dados', erro);
-      return;
-    }
-    // TODO: enviar as alterações para a API
-    setNome(nomeEdit.trim());
-    setEmail(emailEdit.trim());
-    setEditando(false);
+  const erro = validarNome(nomeEdit) ?? validarEmail(emailEdit);
+
+  if (erro) {
+    Alert.alert('Confira os dados', erro);
+    return;
   }
 
-  function sair() {
-    Alert.alert('Sair da conta', 'Deseja realmente sair?', [
-      { text: 'Voltar', style: 'cancel' },
+  Alert.alert(
+    'Funcionalidade em desenvolvimento',
+    'Os dados estão válidos. Ainda precisamos implementar a atualização do perfil na API para salvar no banco de dados.'
+  );
+}
+ 
+function sair() {
+  const confirmarSaida = () => {
+    // Limpa usuário e token do AuthContext.
+    encerrarSessao();
+
+    // Volta ao login e substitui a tela atual.
+    router.replace('/');
+  };
+
+  if (Platform.OS === 'web') {
+    if (window.confirm('Deseja realmente sair da sua conta?')) {
+      confirmarSaida();
+    }
+    return;
+  }
+
+  Alert.alert(
+    'Sair da conta',
+    'Deseja realmente sair?',
+    [
+      {
+        text: 'Cancelar',
+        style: 'cancel',
+      },
       {
         text: 'Sair',
         style: 'destructive',
-        // TODO: limpar o token / sessão antes de navegar
-        onPress: () => router.replace('/'),
+        onPress: confirmarSaida,
       },
-    ]);
-  }
+    ]
+  );
+}
+
 
   function excluirConta() {
     Alert.alert(
