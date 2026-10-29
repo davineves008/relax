@@ -32,23 +32,40 @@ export async function fazerLogin(
     throw new Error('Endereço da API não configurado.');
   }
 
-  const resposta = await fetch(`${API_BASE_URL}/api/auth/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      email: email.trim().toLowerCase(),
-      senha,
-    }),
-  });
+  let resposta: Response;
 
-  const dados = await resposta.json();
+  try {
+    resposta = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: email.trim().toLowerCase(),
+        senha,
+      }),
+    });
+  } catch {
+    // Falha de rede, API desligada ou CORS
+    throw new Error(
+      'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.'
+    );
+  }
+
+  const tipo = resposta.headers.get('content-type') ?? '';
+  const dados = tipo.includes('application/json')
+    ? await resposta.json().catch(() => null)
+    : null;
 
   if (!resposta.ok) {
+    if (resposta.status === 401) {
+      throw new Error(dados?.mensagem ?? 'E-mail ou senha inválidos.');
+    }
     throw new Error(
-      dados.mensagem ?? 'Não foi possível realizar o login.'
+      dados?.mensagem ?? 'Erro no servidor. Tente novamente mais tarde.'
     );
+  }
+
+  if (!dados) {
+    throw new Error('Resposta inválida do servidor.');
   }
 
   return dados as LoginResponse;
